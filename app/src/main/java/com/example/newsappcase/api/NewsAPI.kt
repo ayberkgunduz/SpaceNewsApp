@@ -16,6 +16,8 @@ interface NewsAPI {
 
     @GET("v4/articles/")
     suspend fun searchArticles(
+        @Query("search")
+        keyword: String,
         @Query("limit")
         limit: Int = 10,
         @Query("offset")

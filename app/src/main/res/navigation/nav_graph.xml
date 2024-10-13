@@ -2,12 +2,16 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/detailedNewsFragment">
+    app:startDestination="@id/newsFragment">
 
     <fragment
         android:id="@+id/detailedNewsFragment"
         android:name="com.example.newsappcase.ui.fragments.DetailedNewsFragment"
-        android:label="DetailedNewsFragment" />
+        android:label="DetailedNewsFragment" >
+        <argument
+            android:name="article"
+            app:argType="com.example.newsappcase.model.Article" />
+    </fragment>
     <fragment
         android:id="@+id/newsFragment"
         android:name="com.example.newsappcase.ui.fragments.NewsFragment"

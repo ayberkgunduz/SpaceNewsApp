@@ -2,6 +2,7 @@ package com.example.newsappcase.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,7 +17,11 @@ interface ArticleDoa {
     @Query("SELECT * FROM articles")
     fun getAllArticles(): LiveData<List<Article>>
 
-    @Query("DELETE FROM articles")//(...) eklenmeyebilir!!
+    @Query("DELETE FROM articles")
     suspend fun deleteAllArticles()
+
+    @Delete
+    suspend fun deleteArticle(article: Article)
+
 
 }
