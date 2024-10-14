@@ -14,28 +14,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
-import com.example.newsappcase.databinding.FragmentNewsBinding
 import com.example.newsappcase.databinding.FragmentSearchNewsBinding
-import com.example.newsappcase.db.ArticleDatabase
-import com.example.newsappcase.repository.NewsRepository
-import com.example.newsappcase.ui.MainActivity
 import com.example.newsappcase.ui.NewsViewModel
-import com.example.newsappcase.ui.NewsViewModelProviderFactory
 import com.example.newsappcase.util.Constants
 import com.example.newsappcase.util.Resource
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
     val TAG = "SearchNewsFragment"
     private var _binding: FragmentSearchNewsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NewsViewModel by viewModels {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase(requireContext())))
-    }
+    private val viewModel: NewsViewModel by viewModels()
     lateinit var newsAdapter: NewsAdapter
 
     var isLoading = false

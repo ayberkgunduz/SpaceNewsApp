@@ -6,17 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsappcase.model.Article
 import com.example.newsappcase.model.NewsResponse
-import com.example.newsappcase.repository.NewsRepository
+import com.example.newsappcase.network.NetworkConnectionInterceptor
+import com.example.newsappcase.api.NewsRemoteRepository
+import com.example.newsappcase.repository.NewsLocalRepository
 import com.example.newsappcase.util.Resource
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import javax.inject.Inject
 
-class NewsViewModel(
-val repository: NewsRepository
+@HiltViewModel
+class NewsViewModel @Inject constructor(
+    private val remoteRepository: NewsRemoteRepository,
+    private val localRepository: NewsLocalRepository,
+    private val networkConnectionInterceptor: NetworkConnectionInterceptor
 ) : ViewModel() {
 
     val newsData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
@@ -30,19 +33,21 @@ val repository: NewsRepository
     var searchNewsResponse: NewsResponse? = null
 
     init {
-        getNews()
+        if(checkInternetConnection())  {
+            getNews()
+        }
     }
 
     fun getNews() = viewModelScope.launch {
         newsData.postValue(Resource.Loading())
-        val response = repository.getNews(newsLimit, newsOffset)
+        val response = remoteRepository.getNews(newsLimit, newsOffset)
         newsData.postValue(handleGetNewsResponse(response))
     }
 
     fun searchNews(searchQuery: String) = viewModelScope.launch {
         Log.d("NewsViewModel", "Search query: $searchQuery")
         newsData.postValue(Resource.Loading())
-        val response = repository.searchNews(searchQuery, searchNewsLimit, searchNewsOffset)
+        val response = remoteRepository.searchNews(searchQuery, searchNewsLimit, searchNewsOffset)
         searchNewsData.postValue(handleSearchNewsResponse(response))// YANLIS handleSearchNewsResponse
     }
 
@@ -81,17 +86,21 @@ val repository: NewsRepository
     }
 
     fun saveArticle(article: Article) = viewModelScope.launch {
-        repository.insert(article)
+        localRepository.insert(article)
     }
 
-    fun getSavedArticles() = repository.getSavedArticles()
+    fun getSavedArticles() = localRepository.getSavedArticles()
 
     fun deleteAllArticles() = viewModelScope.launch {
-        repository.deleteAllArticles()
+        localRepository.deleteAllArticles()
     }
 
     fun deleteArticle(article: Article) = viewModelScope.launch {
-        repository.deleteArticle(article)
+        localRepository.deleteArticle(article)
+    }
+
+    private fun checkInternetConnection(): Boolean {
+        return networkConnectionInterceptor.isInternetAvailable()
     }
 
 }

@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-
     id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -82,4 +82,16 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+
+    implementation ("com.google.dagger:hilt-android:2.51.1")
+    kapt ("com.google.dagger:hilt-android-compiler:2.51.1")
+
+    // For Hilt with ViewModel
+    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+
+    // For Hilt with Navigation component (optional, if using navigation)
+    implementation ("androidx.hilt:hilt-navigation-fragment:1.2.0")
 }
+
+kapt { correctErrorTypes = true }

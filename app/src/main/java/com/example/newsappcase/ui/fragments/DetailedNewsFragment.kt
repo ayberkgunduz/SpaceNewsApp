@@ -7,25 +7,18 @@ import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.navArgs
-import com.example.newsappcase.R
 import com.example.newsappcase.databinding.FragmentDetailedNewsBinding
-import com.example.newsappcase.databinding.FragmentSearchNewsBinding
-import com.example.newsappcase.db.ArticleDatabase
 import com.example.newsappcase.model.Article
-import com.example.newsappcase.repository.NewsRepository
-import com.example.newsappcase.ui.MainActivity
 import com.example.newsappcase.ui.NewsViewModel
-import com.example.newsappcase.ui.NewsViewModelProviderFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DetailedNewsFragment: Fragment() {
     val TAG = "DetailedNewsFragment"
     private var _binding: FragmentDetailedNewsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NewsViewModel by viewModels {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase(requireContext())))
-    }
+    private val viewModel: NewsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

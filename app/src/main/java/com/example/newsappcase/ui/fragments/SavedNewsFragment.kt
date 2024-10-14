@@ -1,13 +1,10 @@
 package com.example.newsappcase.ui.fragments
 
-import android.content.ClipData.Item
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,26 +14,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentSavedNewsBinding
-import com.example.newsappcase.databinding.FragmentSearchNewsBinding
-import com.example.newsappcase.db.ArticleDatabase
-import com.example.newsappcase.repository.NewsRepository
-import com.example.newsappcase.ui.MainActivity
 import com.example.newsappcase.ui.NewsViewModel
-import com.example.newsappcase.ui.NewsViewModelProviderFactory
-import com.example.newsappcase.util.Resource
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SavedNewsFragment: Fragment() {
     val TAG = "SavedNewsFragment"
     private var _binding: FragmentSavedNewsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NewsViewModel by viewModels {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase(requireContext())))
-    }
+    private val viewModel: NewsViewModel by viewModels()
     lateinit var newsAdapter: NewsAdapter
 
     override fun onCreateView(
