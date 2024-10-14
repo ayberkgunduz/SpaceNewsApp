@@ -53,7 +53,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
                 if(binding.etSearch.text.isNotEmpty()){
-                    viewModel.searchNews(binding.etSearch.text.toString())
+                    viewModel.searchNews(binding.etSearch.text.toString(), true)
                 } else {
                     viewModel.getNews()
                 }
@@ -88,7 +88,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                 putSerializable("article", it)
             }
             findNavController().navigate(
-                R.id.action_newsFragment_to_detailedNewsFragment,bundle)
+                R.id.action_searchNewsFragment_to_detailedNewsFragment,bundle)
         }
         var searchJob: Job? = null
         binding.etSearch.addTextChangedListener { editable ->
@@ -98,7 +98,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                 searchJob = MainScope().launch {
                     editable?.let {
                         if (editable.toString().isNotEmpty()) {
-                            viewModel.searchNews(editable.toString())
+                            viewModel.searchNews(editable.toString(), false)
                         } else{
                             viewModel.getNews()
                         }
@@ -119,32 +119,9 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                 is Resource.Success -> {
                     hideProgressBar()
                     newsResponse.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.results)
-                        val totalPages = newsResponse.count / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                        isLastPage = viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
-                        if (isLastPage) {
-                            binding.rvSearchNews.setPadding(0, 0, 0, 0)
-                        }
-                    }
-                }
-            }
-        }
-
-        viewModel.searchNewsData.observe(viewLifecycleOwner) { newsResponse ->// farklı yaptı
-            when (newsResponse) {
-                is Resource.Error -> {
-                    hideProgressBar()
-                    newsResponse.message?.let { message ->
-                        Log.e(TAG, "An error occurred: $message")
-                    }
-                }
-                is Resource.Loading -> showProgressBar()
-                is Resource.Success -> {
-                    hideProgressBar()
-                    newsResponse.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.results.toList())
-                        val totalPages = newsResponse.count / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                        isLastPage = viewModel.searchNewsOffset == totalPages// bu yanlıs buraya bi bakıcam
+                        val totalPages = newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
+                        isLastPage = viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
                         if (isLastPage) {
                             binding.rvSearchNews.setPadding(0, 0, 0, 0)
                         }

@@ -12,5 +12,7 @@ interface NewsLocalRepository {
 
     suspend fun deleteAllArticles()
 
-    suspend fun deleteArticle(article: Article)
+    suspend fun deleteArticle(id: Int)
+
+    suspend fun checkIfArticleExists(id: Int): Boolean
 }

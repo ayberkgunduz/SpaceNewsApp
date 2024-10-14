@@ -41,7 +41,7 @@ class DetailedNewsFragment: Fragment() {
             }
 
             binding.fab.setOnClickListener {
-                viewModel.saveArticle(article)
+                viewModel.checkIsArticleSaved(article)
             }
 
         }

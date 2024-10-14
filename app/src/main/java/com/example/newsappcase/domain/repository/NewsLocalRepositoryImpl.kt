@@ -13,5 +13,7 @@ class NewsLocalRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAllArticles() = db.getArticleDao().deleteAllArticles()
 
-    override suspend fun deleteArticle(article: Article) = db.getArticleDao().deleteArticle(article)
+    override suspend fun deleteArticle(id: Int) = db.getArticleDao().deleteArticle(id)
+
+    override suspend fun checkIfArticleExists(id: Int) = db.getArticleDao().isArticleExists(id)
 }
