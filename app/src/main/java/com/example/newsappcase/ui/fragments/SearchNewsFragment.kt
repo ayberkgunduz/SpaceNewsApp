@@ -84,11 +84,8 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
         super.onViewCreated(view, savedInstanceState)
         setupNewsAdapter()
         newsAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(
-                R.id.action_searchNewsFragment_to_detailedNewsFragment,bundle)
+            val direction = SearchNewsFragmentDirections.actionSearchNewsFragmentToDetailedNewsFragment(it)
+                findNavController().navigate(direction)
         }
         var searchJob: Job? = null
         binding.etSearch.addTextChangedListener { editable ->

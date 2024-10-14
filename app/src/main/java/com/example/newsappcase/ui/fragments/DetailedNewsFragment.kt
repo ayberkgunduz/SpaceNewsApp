@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import com.example.newsappcase.databinding.FragmentDetailedNewsBinding
 import com.example.newsappcase.model.Article
 import com.example.newsappcase.ui.NewsViewModel
@@ -20,6 +21,8 @@ class DetailedNewsFragment: Fragment() {
 
     private val viewModel: NewsViewModel by viewModels()
 
+    private val args: DetailedNewsFragmentArgs by navArgs()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -31,10 +34,10 @@ class DetailedNewsFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val article = arguments?.getSerializable("article") as? Article
+        val article = args.article
 
 
-        article?.let {
+        article.let {
             binding.webView.apply {
                 webViewClient = WebViewClient()
                 it.url?.let { it1 -> loadUrl(it1) }

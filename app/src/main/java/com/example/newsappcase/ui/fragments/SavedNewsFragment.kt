@@ -38,11 +38,8 @@ class SavedNewsFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupNewsAdapter()
         newsAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(
-                R.id.action_savedNewsFragment_to_detailedNewsFragment,bundle)
+            val direction = SavedNewsFragmentDirections.actionSavedNewsFragmentToDetailedNewsFragment(it)
+                findNavController().navigate(direction)
         }
 
 
