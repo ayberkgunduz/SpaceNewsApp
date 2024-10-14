@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import com.example.newsappcase.network.NetworkConnectionInterceptor
 import com.example.newsappcase.api.NewsAPI
+import com.example.newsappcase.api.NewsRemoteRepository
+import com.example.newsappcase.api.NewsRemoteRepositoryImpl
 import com.example.newsappcase.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -54,5 +56,12 @@ class NetworkModule {
     fun provideNewsService(retrofit: Retrofit): NewsAPI {
         return retrofit.create(NewsAPI::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideNewsRemoteRepository(newsService: NewsAPI): NewsRemoteRepository {
+        return NewsRemoteRepositoryImpl(newsService)
+    }
+
 
 }

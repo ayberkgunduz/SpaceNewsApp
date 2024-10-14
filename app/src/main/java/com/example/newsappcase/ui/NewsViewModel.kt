@@ -8,7 +8,7 @@ import com.example.newsappcase.model.Article
 import com.example.newsappcase.model.NewsResponse
 import com.example.newsappcase.network.NetworkConnectionInterceptor
 import com.example.newsappcase.api.NewsRemoteRepository
-import com.example.newsappcase.repository.NewsLocalRepository
+import com.example.newsappcase.domain.repository.NewsLocalRepository
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
