@@ -111,37 +111,40 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
             }
         }
-        viewModel.newsData.observe(viewLifecycleOwner) { newsResponse ->// farklı yaptı
-            when (newsResponse) {
-                is Resource.Error -> {
-                    hideProgressBar()
-                    newsResponse.message?.let { message ->
-                        Log.e(TAG, "An error occurred: $message")
-                    }
-                }
-
-                is Resource.Loading -> showProgressBar()
-                is Resource.Success -> {
-                    hideProgressBar()
-                    newsResponse.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.results.toList())
-                        val totalPages =
-                            newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                        isLastPage =
-                            viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
-                        if (isLastPage) {
-                            binding.rvSearchNews.setPadding(0, 0, 0, 0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.newsData.collectLatest { newsResponse ->
+                when (newsResponse) {
+                    is Resource.Error -> {
+                        hideProgressBar()
+                        newsResponse.message?.let { message ->
+                            Log.e(TAG, "An error occurred: $message")
                         }
                     }
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        newsResponse.data?.let { newsResponse ->
+                            newsAdapter.differ.submitList(newsResponse.results.toList())
+                            val totalPages =
+                                newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
+                            isLastPage =
+                                viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
+                            if (isLastPage) {
+                                binding.rvSearchNews.setPadding(0, 0, 0, 0)
+                            }
+                        }
+                    }
+                    is Resource.NoConnection -> {
+                        hideProgressBar()
+                    }
                 }
-
-                is Resource.NoConnection -> {}
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.offlineNewsData.collectLatest { response ->
                 if (response is Resource.NoConnection) {
+                    hideProgressBar()
                     requireContext().showToast(
                         getString(R.string.no_internet_connection),
                         Toast.LENGTH_SHORT

@@ -84,30 +84,35 @@ class NewsFragment : Fragment() {
             val direction = NewsFragmentDirections.actionNewsFragmentToDetailedNewsFragment(it)
             findNavController().navigate(direction)
         }
-        viewModel.newsData.observe(viewLifecycleOwner) { newsResponse ->
-            when (newsResponse) {
-                is Resource.Error -> {
-                    hideProgressBar()
-                    newsResponse.message?.let { message ->
-                        Log.e(TAG, "An error occurred: $message")
-                    }
-                }
-
-                is Resource.Loading -> showProgressBar()
-                is Resource.Success -> {
-                    hideProgressBar()
-                    newsResponse.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.results.toList())
-                        val totalPages = newsResponse.count / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                        isLastPage =
-                            viewModel.newsOffset == totalPages
-                        if (isLastPage) {
-                            binding.rvBreakingNews.setPadding(0, 0, 0, 0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.newsData.collectLatest { newsResponse ->
+                when (newsResponse) {
+                    is Resource.Error -> {
+                        hideProgressBar()
+                        newsResponse.message?.let { message ->
+                            Log.e(TAG, "An error occurred: $message")
                         }
                     }
-                }
 
-                is Resource.NoConnection -> {}
+                    is Resource.Loading -> showProgressBar()
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        newsResponse.data?.let { newsResponse ->
+                            newsAdapter.differ.submitList(newsResponse.results.toList())
+                            val totalPages =
+                                newsResponse.count / Constants.SINGLE_QUERY_ITEM_SIZE + 2
+                            isLastPage =
+                                viewModel.newsOffset == totalPages
+                            if (isLastPage) {
+                                binding.rvBreakingNews.setPadding(0, 0, 0, 0)
+                            }
+                        }
+                    }
+
+                    is Resource.NoConnection -> {
+                        hideProgressBar()
+                    }
+                }
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -117,10 +122,11 @@ class NewsFragment : Fragment() {
                     is Resource.Loading -> {}
                     is Resource.Success -> {}
                     is Resource.NoConnection -> {
+                        hideProgressBar()
                         newsAdapter.differ.submitList(response.data)
                         requireContext().showToast(
                             getString(R.string.offline_mode),
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_SHORT
                         )
                     }
                 }

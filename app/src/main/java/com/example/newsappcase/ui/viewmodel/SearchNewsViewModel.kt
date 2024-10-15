@@ -39,7 +39,7 @@ class SearchNewsViewModel @Inject constructor(
             if (checkInternetConnection()) {
                 searchNews("", false)
             } else {
-                _offlineNewsData.emit(Resource.NoConnection(null))
+                updateOfflineNewsData(Resource.NoConnection(null))
             }
         }
     }
@@ -47,14 +47,14 @@ class SearchNewsViewModel @Inject constructor(
     fun searchNews(searchQuery: String, isPaginating: Boolean) = viewModelScope.launch {
         Log.d(TAG, "Search query: $searchQuery")
         if (!checkInternetConnection()) {
-            _offlineNewsData.emit(Resource.NoConnection(null))
+            updateOfflineNewsData(Resource.NoConnection(null))
             return@launch
         }
         if (!isPaginating) {
             searchNewsOffset = 0
             searchNewsResponse = null
         }
-        newsData.postValue(Resource.Loading())
+        updateNewsData(Resource.Loading())
         val param = SendAuthCodeParam(
             type = GetNewsType.SEARCH_NEWS,
             limit = searchNewsLimit,
@@ -63,9 +63,9 @@ class SearchNewsViewModel @Inject constructor(
         )
         getNewsUseCase.invoke(param).catch {
             Log.d(TAG, "Error: ${it.message}")
-            newsData.postValue(Resource.Error(it.message.toString()))
+            updateNewsData(Resource.Error(it.message.toString()))
         }.collect { response ->
-            newsData.postValue(handleSearchNewsResponse(response))
+            updateNewsData(handleSearchNewsResponse(response))
         }
     }
 

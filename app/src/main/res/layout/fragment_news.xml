@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black">
+        android:background="@drawable/space">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvBreakingNews"

@@ -15,7 +15,9 @@ import com.example.newsappcase.network.NetworkConnectionInterceptor
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -29,9 +31,11 @@ open class CommonNewsViewModel @Inject constructor(
     private val cachedNewsLocalRepository: CachedNewsLocalRepository
 ) : ViewModel() {
     private val TAG = "CommonNewsViewModel"
-    val newsData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
 
-    val _offlineNewsData = MutableSharedFlow<Resource<List<Article>>>()
+    private val _newsData: MutableStateFlow<Resource<NewsResponse>> = MutableStateFlow(Resource.NoConnection(null))
+    val newsData: StateFlow<Resource<NewsResponse>> = _newsData
+
+    private val _offlineNewsData = MutableSharedFlow<Resource<List<Article>>>()
     val offlineNewsData: SharedFlow<Resource<List<Article>>> = _offlineNewsData
 
 
@@ -39,9 +43,22 @@ open class CommonNewsViewModel @Inject constructor(
     private var newsLimit = 10
     var newsResponse: NewsResponse? = null
 
+    fun updateNewsData(newData: Resource<NewsResponse>) {
+        viewModelScope.launch {
+            _newsData.emit(newData)
+        }
+    }
 
+    fun updateOfflineNewsData(newData: Resource<List<Article>>) {
+        viewModelScope.launch {
+            _offlineNewsData.emit(newData)
+        }
+    }
     fun getNews() = viewModelScope.launch {
-        newsData.postValue(Resource.Loading())
+        if (!checkInternetConnection()) {
+            return@launch
+        }
+        _newsData.emit(Resource.Loading())
         val param = SendAuthCodeParam(
             type = GetNewsType.SEARCH_NEWS,
             limit = newsLimit,
@@ -49,14 +66,14 @@ open class CommonNewsViewModel @Inject constructor(
         )
         getNewsUseCase.invoke(param).catch {
             Log.d(TAG, "Error: ${it.message}")
-            newsData.postValue(Resource.Error(it.message.toString()))
+            _newsData.emit(Resource.Error(it.message.toString()))
         }.collect { response ->
             response.body()?.results?.forEach { article ->
                 if (article.id != null && cachedNewsLocalRepository.canInsertNewArticle(article.id)) {
                     cachedNewsLocalRepository.insert(article)
                 }
             }
-            newsData.postValue(handleGetNewsResponse(response))
+            _newsData.emit(handleGetNewsResponse(response))
         }
     }
 
