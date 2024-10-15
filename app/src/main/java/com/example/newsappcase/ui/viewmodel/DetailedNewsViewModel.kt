@@ -24,7 +24,7 @@ class DetailedNewsViewModel @Inject constructor(
     networkConnectionInterceptor,
     getNewsUseCase,
     cachedNewsLocalRepository
-){
+) {
     private val _favoriteEvent = MutableSharedFlow<FavoriteEvent>()
     val favoriteEvent: SharedFlow<FavoriteEvent> = _favoriteEvent
 

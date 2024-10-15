@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.example.newsappcase.R
 import com.example.newsappcase.databinding.FragmentDetailedNewsBinding
 import com.example.newsappcase.extensions.setSingleOnClickListener
 import com.example.newsappcase.extensions.showToast
@@ -19,8 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DetailedNewsFragment: Fragment() {
-    val TAG = "DetailedNewsFragment"
+class DetailedNewsFragment : Fragment() {
     private var _binding: FragmentDetailedNewsBinding? = null
     private val binding get() = _binding!!
 
@@ -47,15 +47,15 @@ class DetailedNewsFragment: Fragment() {
                 it.url?.let { it1 -> loadUrl(it1) }
             }
 
-            binding.fab.setSingleOnClickListener {
+            binding.actionButton.setSingleOnClickListener {
                 viewModel.checkIsArticleSaved(article)
             }
 
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.favoriteEvent.collectLatest { event ->
                     when (event) {
-                        FavoriteEvent.AddedFavorite -> context?.showToast("Article saved")
-                        FavoriteEvent.RemovedFavorite -> context?.showToast("Article removed")
+                        FavoriteEvent.AddedFavorite -> context?.showToast(getString(R.string.article_saved))
+                        FavoriteEvent.RemovedFavorite -> context?.showToast(getString(R.string.article_removed))
                     }
                 }
             }

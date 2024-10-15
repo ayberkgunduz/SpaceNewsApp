@@ -12,15 +12,7 @@ class CachedNewsLocalRepositoryImpl @Inject constructor(
 ): CachedNewsLocalRepository {
     override suspend fun insert(article: Article) = db.getCachedArticleDao().insert(article.toCachedArticle())
 
-    override fun getSavedArticles() = db.getCachedArticleDao().getAllArticles()
-
     override suspend fun deleteAllArticles() = db.getCachedArticleDao().deleteAllArticles()
-
-    override suspend fun deleteArticle(id: Int) = db.getCachedArticleDao().deleteArticle(id)
-
-    override suspend fun checkIfArticleExists(id: Int) = db.getCachedArticleDao().isArticleExists(id)
-
-    override suspend fun insertAll(articles: List<Article>) = db.getCachedArticleDao().insertArticles(articles)
 
     override suspend fun canInsertNewArticle(articleId: Int) = db.getCachedArticleDao().canInsertNewArticle(articleId) && (db.getCachedArticleDao().getArticleCount() < 50)
 

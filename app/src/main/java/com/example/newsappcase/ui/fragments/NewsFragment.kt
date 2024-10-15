@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentNewsBinding
 import com.example.newsappcase.extensions.invisible
@@ -26,20 +27,19 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class NewsFragment: Fragment() {
+class NewsFragment : Fragment() {
 
     val TAG = "NewsFragment"
     private var _binding: FragmentNewsBinding? = null
     private val binding get() = _binding!!
 
-    //private val viewModel: NewsViewModel by activityViewModels()
     private val viewModel: NewsViewModel by viewModels()
     lateinit var newsAdapter: NewsAdapter
     var isLoading = false
     var isLastPage = false
     var isScrolling = false
 
-    val scrollListener = object : RecyclerView.OnScrollListener(){
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -61,7 +61,7 @@ class NewsFragment: Fragment() {
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
@@ -100,16 +100,14 @@ class NewsFragment: Fragment() {
                         newsAdapter.differ.submitList(newsResponse.results.toList())
                         val totalPages = newsResponse.count / Constants.SINGLE_QUERY_ITEM_SIZE + 2
                         isLastPage =
-                            viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
+                            viewModel.newsOffset == totalPages
                         if (isLastPage) {
                             binding.rvBreakingNews.setPadding(0, 0, 0, 0)
                         }
                     }
                 }
 
-                is Resource.NoConnection -> {
-                    //birazdan eklicem
-                }
+                is Resource.NoConnection -> {}
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -120,14 +118,16 @@ class NewsFragment: Fragment() {
                     is Resource.Success -> {}
                     is Resource.NoConnection -> {
                         newsAdapter.differ.submitList(response.data)
-                        requireContext().showToast("Offline Mode", Toast.LENGTH_LONG)
+                        requireContext().showToast(
+                            getString(R.string.offline_mode),
+                            Toast.LENGTH_LONG
+                        )
                     }
                 }
             }
         }
         viewModel.initNews()
     }
-
 
 
     private fun hideProgressBar() {

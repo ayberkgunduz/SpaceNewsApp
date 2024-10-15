@@ -29,6 +29,7 @@ class SearchNewsViewModel @Inject constructor(
     cachedNewsLocalRepository
 ) {
 
+    private val TAG = "SearchNewsViewModel"
     private var searchNewsOffset = 0
     private var searchNewsLimit = 10
     private var searchNewsResponse: NewsResponse? = null
@@ -44,19 +45,24 @@ class SearchNewsViewModel @Inject constructor(
     }
 
     fun searchNews(searchQuery: String, isPaginating: Boolean) = viewModelScope.launch {
-        Log.d("NewsViewModel", "Search query: $searchQuery")
+        Log.d(TAG, "Search query: $searchQuery")
         if (!checkInternetConnection()) {
             _offlineNewsData.emit(Resource.NoConnection(null))
             return@launch
         }
-        if(!isPaginating) {
+        if (!isPaginating) {
             searchNewsOffset = 0
             searchNewsResponse = null
         }
         newsData.postValue(Resource.Loading())
-        val param = SendAuthCodeParam(type = GetNewsType.SEARCH_NEWS, limit =  searchNewsLimit, offset = searchNewsOffset, searchText = searchQuery)
+        val param = SendAuthCodeParam(
+            type = GetNewsType.SEARCH_NEWS,
+            limit = searchNewsLimit,
+            offset = searchNewsOffset,
+            searchText = searchQuery
+        )
         getNewsUseCase.invoke(param).catch {
-            Log.d("NewsViewModel", "Error: ${it.message}")
+            Log.d(TAG, "Error: ${it.message}")
             newsData.postValue(Resource.Error(it.message.toString()))
         }.collect { response ->
             newsData.postValue(handleSearchNewsResponse(response))

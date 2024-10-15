@@ -18,6 +18,6 @@ class SavedNewsViewModel @Inject constructor(
     networkConnectionInterceptor,
     getNewsUseCase,
     cachedNewsLocalRepository
-){
+) {
     fun getSavedArticles() = saveAndDeleteNewsUseCase.getSavedNews()
 }

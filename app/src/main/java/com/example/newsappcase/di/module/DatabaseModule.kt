@@ -46,7 +46,4 @@ class DatabaseModule {
     fun provideCachedNewsLocalRepository(db: ArticleDatabase): CachedNewsLocalRepository {
         return CachedNewsLocalRepositoryImpl(db)
     }
-
-
-
 }

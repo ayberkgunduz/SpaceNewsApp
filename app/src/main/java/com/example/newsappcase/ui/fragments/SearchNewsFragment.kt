@@ -31,19 +31,19 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
+class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     val TAG = "SearchNewsFragment"
     private var _binding: FragmentSearchNewsBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: SearchNewsViewModel by viewModels()
-    lateinit var newsAdapter: NewsAdapter
+    private lateinit var newsAdapter: NewsAdapter
 
     var isLoading = false
     var isLastPage = false
     var isScrolling = false
 
-    val scrollListener = object : RecyclerView.OnScrollListener(){
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -58,7 +58,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
             val shouldPaginate = isNotLoadingAndOnNotLastPage && isLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                if(binding.etSearch.text.isNotEmpty()){
+                if (binding.etSearch.text.isNotEmpty()) {
                     viewModel.searchNews(binding.etSearch.text.toString(), true)
                 } else {
                     viewModel.searchNews("", true)
@@ -71,7 +71,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                 isScrolling = true
             }
         }
@@ -90,8 +90,9 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
         super.onViewCreated(view, savedInstanceState)
         setupNewsAdapter()
         newsAdapter.setOnItemClickListener {
-            val direction = SearchNewsFragmentDirections.actionSearchNewsFragmentToDetailedNewsFragment(it)
-                findNavController().navigate(direction)
+            val direction =
+                SearchNewsFragmentDirections.actionSearchNewsFragmentToDetailedNewsFragment(it)
+            findNavController().navigate(direction)
         }
         var searchJob: Job? = null
         binding.etSearch.addTextChangedListener { editable ->
@@ -102,7 +103,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                     editable?.let {
                         if (editable.toString().isNotEmpty()) {
                             viewModel.searchNews(editable.toString(), false)
-                        } else{
+                        } else {
                             viewModel.searchNews("", false)
                         }
                     }
@@ -118,18 +119,22 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                         Log.e(TAG, "An error occurred: $message")
                     }
                 }
+
                 is Resource.Loading -> showProgressBar()
                 is Resource.Success -> {
                     hideProgressBar()
                     newsResponse.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.results.toList())
-                        val totalPages = newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                        isLastPage = viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
+                        val totalPages =
+                            newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
+                        isLastPage =
+                            viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
                         if (isLastPage) {
                             binding.rvSearchNews.setPadding(0, 0, 0, 0)
                         }
                     }
                 }
+
                 is Resource.NoConnection -> {}
             }
         }
@@ -137,7 +142,10 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.offlineNewsData.collectLatest { response ->
                 if (response is Resource.NoConnection) {
-                    requireContext().showToast("No Internet Connection", Toast.LENGTH_SHORT)
+                    requireContext().showToast(
+                        getString(R.string.no_internet_connection),
+                        Toast.LENGTH_SHORT
+                    )
                 }
             }
         }

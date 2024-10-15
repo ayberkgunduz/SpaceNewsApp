@@ -9,11 +9,13 @@ import com.example.newsappcase.databinding.ItemNewsBinding
 import com.example.newsappcase.extensions.displayImage
 import com.example.newsappcase.model.Article
 
-class NewsAdapter: RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
+class NewsAdapter : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
     private var onItemClickListener: ((Article) -> Unit)? = null
-    inner class NewsViewHolder(private val binding: ItemNewsBinding): RecyclerView.ViewHolder(binding.root) {
+
+    inner class NewsViewHolder(private val binding: ItemNewsBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(article: Article) {
-            binding.imageViewArticle.displayImage(article.image_url)
+            binding.ivArticle.displayImage(article.image_url)
             binding.tvTitle.text = article.title
             binding.tvPublishedAt.text = article.published_at
             binding.tvDescription.text = article.summary
@@ -34,7 +36,7 @@ class NewsAdapter: RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
         }
 
     }
-     val differ = AsyncListDiffer(this, differCallback)
+    val differ = AsyncListDiffer(this, differCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
         val binding = ItemNewsBinding.inflate(LayoutInflater.from(parent.context), parent, false)

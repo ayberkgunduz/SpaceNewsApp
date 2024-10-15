@@ -28,7 +28,7 @@ open class CommonNewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
     private val cachedNewsLocalRepository: CachedNewsLocalRepository
 ) : ViewModel() {
-
+    private val TAG = "CommonNewsViewModel"
     val newsData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
 
     val _offlineNewsData = MutableSharedFlow<Resource<List<Article>>>()
@@ -48,7 +48,7 @@ open class CommonNewsViewModel @Inject constructor(
             offset = newsOffset
         )
         getNewsUseCase.invoke(param).catch {
-            Log.d("NewsViewModel", "Error: ${it.message}")
+            Log.d(TAG, "Error: ${it.message}")
             newsData.postValue(Resource.Error(it.message.toString()))
         }.collect { response ->
             response.body()?.results?.forEach { article ->

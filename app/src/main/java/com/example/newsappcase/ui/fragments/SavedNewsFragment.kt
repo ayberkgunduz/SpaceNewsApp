@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentSavedNewsBinding
 import com.example.newsappcase.extensions.showToast
@@ -17,8 +18,7 @@ import com.example.newsappcase.ui.viewmodel.SavedNewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SavedNewsFragment: Fragment() {
-    val TAG = "SavedNewsFragment"
+class SavedNewsFragment : Fragment() {
     private var _binding: FragmentSavedNewsBinding? = null
     private val binding get() = _binding!!
 
@@ -33,19 +33,21 @@ class SavedNewsFragment: Fragment() {
         _binding = FragmentSavedNewsBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupNewsAdapter()
         newsAdapter.setOnItemClickListener {
-            val direction = SavedNewsFragmentDirections.actionSavedNewsFragmentToDetailedNewsFragment(it)
-                findNavController().navigate(direction)
+            val direction =
+                SavedNewsFragmentDirections.actionSavedNewsFragmentToDetailedNewsFragment(it)
+            findNavController().navigate(direction)
         }
 
 
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ){
+        ) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -58,7 +60,7 @@ class SavedNewsFragment: Fragment() {
                 val position = viewHolder.adapterPosition
                 val article = newsAdapter.differ.currentList[position]
                 viewModel.deleteArticle(article)
-                requireContext().showToast("Article deleted")
+                requireContext().showToast(getString(R.string.article_deleted))
             }
 
         }

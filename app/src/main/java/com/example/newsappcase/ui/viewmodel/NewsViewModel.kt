@@ -21,8 +21,7 @@ class NewsViewModel @Inject constructor(
     networkConnectionInterceptor,
     getNewsUseCase,
     cachedNewsLocalRepository
-){
-
+) {
     init {
         viewModelScope.launch {
             if (checkInternetConnection()) {

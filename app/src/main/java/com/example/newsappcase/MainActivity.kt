@@ -17,21 +17,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        /*
-        val newsRepository = NewsRepository(ArticleDatabase(this))
-        val viewModelProviderFactory = NewsViewModelProviderFactory(newsRepository)
-        viewModel = ViewModelProvider(this, viewModelProviderFactory)[NewsViewModel::class.java]
-
-         */
-
-        // Find NavController
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
         navController = navHostFragment.navController
 
-
-
-        // Connect BottomNavigationView with NavController
         binding.bottomNavigationView.setupWithNavController(navController)
     }
 }
