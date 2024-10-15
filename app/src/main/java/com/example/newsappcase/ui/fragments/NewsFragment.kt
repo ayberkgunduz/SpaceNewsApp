@@ -9,16 +9,21 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentNewsBinding
-import com.example.newsappcase.ui.NewsViewModel
+import com.example.newsappcase.extensions.invisible
+import com.example.newsappcase.extensions.showToast
+import com.example.newsappcase.extensions.visible
+import com.example.newsappcase.ui.viewmodel.NewsViewModel
 import com.example.newsappcase.util.Constants
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NewsFragment: Fragment() {
@@ -101,29 +106,37 @@ class NewsFragment: Fragment() {
                         }
                     }
                 }
-            }
-        }
-        viewModel.offlineNewsData.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
-                is Resource.Success -> {
-                    newsAdapter.differ.submitList(response.data)
-                    Toast.makeText(requireContext(), "Offline Mode", Toast.LENGTH_LONG).show()
+
+                is Resource.NoConnection -> {
+                    //birazdan eklicem
                 }
             }
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.offlineNewsData.collectLatest { response ->
+                when (response) {
+                    is Resource.Error -> {}
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {}
+                    is Resource.NoConnection -> {
+                        newsAdapter.differ.submitList(response.data)
+                        requireContext().showToast("Offline Mode", Toast.LENGTH_LONG)
+                    }
+                }
+            }
+        }
+        viewModel.initNews()
     }
 
 
 
     private fun hideProgressBar() {
-        binding.paginationProgressBar.visibility = View.INVISIBLE
+        binding.paginationProgressBar.invisible()
         isLoading = false
     }
 
     private fun showProgressBar() {
-        binding.paginationProgressBar.visibility = View.VISIBLE
+        binding.paginationProgressBar.visible()
         isLoading = true
     }
 

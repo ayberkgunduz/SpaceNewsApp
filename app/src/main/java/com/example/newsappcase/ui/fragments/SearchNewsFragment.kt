@@ -6,22 +6,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentSearchNewsBinding
-import com.example.newsappcase.ui.NewsViewModel
+import com.example.newsappcase.extensions.invisible
+import com.example.newsappcase.extensions.showToast
+import com.example.newsappcase.extensions.visible
+import com.example.newsappcase.ui.viewmodel.SearchNewsViewModel
 import com.example.newsappcase.util.Constants
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -30,7 +36,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
     private var _binding: FragmentSearchNewsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NewsViewModel by viewModels()
+    private val viewModel: SearchNewsViewModel by viewModels()
     lateinit var newsAdapter: NewsAdapter
 
     var isLoading = false
@@ -55,7 +61,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                 if(binding.etSearch.text.isNotEmpty()){
                     viewModel.searchNews(binding.etSearch.text.toString(), true)
                 } else {
-                    viewModel.getNews()
+                    viewModel.searchNews("", true)
                 }
                 isScrolling = false
             } else {
@@ -97,7 +103,7 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                         if (editable.toString().isNotEmpty()) {
                             viewModel.searchNews(editable.toString(), false)
                         } else{
-                            viewModel.getNews()
+                            viewModel.searchNews("", false)
                         }
                     }
                 }
@@ -124,19 +130,26 @@ class SearchNewsFragment: Fragment(R.layout.fragment_search_news) {
                         }
                     }
                 }
+                is Resource.NoConnection -> {}
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.offlineNewsData.collectLatest { response ->
+                if (response is Resource.NoConnection) {
+                    requireContext().showToast("No Internet Connection", Toast.LENGTH_SHORT)
+                }
             }
         }
     }
 
-
-
     private fun hideProgressBar() {
-        binding.paginationProgressBar.visibility = View.INVISIBLE
+        binding.paginationProgressBar.invisible()
         isLoading = false
     }
 
     private fun showProgressBar() {
-        binding.paginationProgressBar.visibility = View.VISIBLE
+        binding.paginationProgressBar.visible()
         isLoading = true
     }
 

@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentSavedNewsBinding
-import com.example.newsappcase.ui.NewsViewModel
+import com.example.newsappcase.extensions.showToast
+import com.example.newsappcase.ui.viewmodel.SavedNewsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,7 +22,7 @@ class SavedNewsFragment: Fragment() {
     private var _binding: FragmentSavedNewsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: NewsViewModel by viewModels()
+    private val viewModel: SavedNewsViewModel by viewModels()
     lateinit var newsAdapter: NewsAdapter
 
     override fun onCreateView(
@@ -59,7 +58,7 @@ class SavedNewsFragment: Fragment() {
                 val position = viewHolder.adapterPosition
                 val article = newsAdapter.differ.currentList[position]
                 viewModel.deleteArticle(article)
-                Toast.makeText(requireContext(), "Article deleted", Toast.LENGTH_SHORT).show()
+                requireContext().showToast("Article deleted")
             }
 
         }
