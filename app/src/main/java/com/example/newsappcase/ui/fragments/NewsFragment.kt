@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -99,6 +100,16 @@ class NewsFragment: Fragment() {
                             binding.rvBreakingNews.setPadding(0, 0, 0, 0)
                         }
                     }
+                }
+            }
+        }
+        viewModel.offlineNewsData.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
+                is Resource.Success -> {
+                    newsAdapter.differ.submitList(response.data)
+                    Toast.makeText(requireContext(), "Offline Mode", Toast.LENGTH_LONG).show()
                 }
             }
         }

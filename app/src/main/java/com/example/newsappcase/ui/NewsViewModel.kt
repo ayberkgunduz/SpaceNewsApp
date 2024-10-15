@@ -8,11 +8,13 @@ import com.example.newsappcase.model.Article
 import com.example.newsappcase.model.NewsResponse
 import com.example.newsappcase.network.NetworkConnectionInterceptor
 import com.example.newsappcase.api.NewsRemoteRepository
+import com.example.newsappcase.domain.repository.CachedNewsLocalRepository
 import com.example.newsappcase.domain.repository.NewsLocalRepository
 import com.example.newsappcase.domain.usecase.GetNewsType
 import com.example.newsappcase.domain.usecase.GetNewsUseCase
 import com.example.newsappcase.domain.usecase.SaveAndDeleteNewsUseCase
 import com.example.newsappcase.domain.usecase.SendAuthCodeParam
+import com.example.newsappcase.model.CachedArticle
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -24,10 +26,13 @@ import javax.inject.Inject
 class NewsViewModel @Inject constructor(
     private val saveAndDeleteNewsUseCase: SaveAndDeleteNewsUseCase,
     private val networkConnectionInterceptor: NetworkConnectionInterceptor,
-    private val getNewsUseCase: GetNewsUseCase
+    private val getNewsUseCase: GetNewsUseCase,
+    private val cachedNewsLocalRepository: CachedNewsLocalRepository
 ) : ViewModel() {
 
     val newsData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    val offlineNewsData: MutableLiveData<Resource<List<Article>>> = MutableLiveData()
+
     var newsOffset = 0
 
     private var newsLimit = 10
@@ -37,18 +42,32 @@ class NewsViewModel @Inject constructor(
     private var searchNewsResponse: NewsResponse? = null
 
     init {
-        if(checkInternetConnection())  {
-            getNews()
+        viewModelScope.launch {
+            if (checkInternetConnection()) {
+                cachedNewsLocalRepository.deleteAllArticles()
+                getNews()
+            } else {
+                getCachedNewsForOfflineMode()
+            }
         }
     }
 
     fun getNews() = viewModelScope.launch {
         newsData.postValue(Resource.Loading())
-        val param = SendAuthCodeParam(type = GetNewsType.SEARCH_NEWS, limit =  newsLimit, offset = newsOffset)
+        val param = SendAuthCodeParam(
+            type = GetNewsType.SEARCH_NEWS,
+            limit = newsLimit,
+            offset = newsOffset
+        )
         getNewsUseCase.invoke(param).catch {
             Log.d("NewsViewModel", "Error: ${it.message}")
             newsData.postValue(Resource.Error(it.message.toString()))
         }.collect { response ->
+            response.body()?.results?.forEach { article ->
+                if (article.id != null && cachedNewsLocalRepository.canInsertNewArticle(article.id)) {
+                    cachedNewsLocalRepository.insert(article)
+                }
+            }
             newsData.postValue(handleGetNewsResponse(response))
         }
     }
@@ -67,6 +86,12 @@ class NewsViewModel @Inject constructor(
         }.collect { response ->
             newsData.postValue(handleSearchNewsResponse(response))
         }
+    }
+
+    fun getCachedNewsForOfflineMode() = viewModelScope.launch {
+        offlineNewsData.postValue(Resource.Success(cachedNewsLocalRepository.getAllCachedArticles()))
+        val x = cachedNewsLocalRepository.getAllCachedArticles()
+        val y = x
     }
 
     private fun handleGetNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {

@@ -3,6 +3,8 @@ package com.example.newsappcase.di.module
 import android.app.Application
 import androidx.room.Room
 import com.example.newsappcase.db.ArticleDatabase
+import com.example.newsappcase.domain.repository.CachedNewsLocalRepository
+import com.example.newsappcase.domain.repository.CachedNewsLocalRepositoryImpl
 import com.example.newsappcase.domain.repository.NewsLocalRepository
 import com.example.newsappcase.domain.repository.NewsLocalRepositoryImpl
 import dagger.Module
@@ -30,9 +32,21 @@ class DatabaseModule {
 
     @Provides
     @Singleton
+    fun provideCachedArticleDao(db: ArticleDatabase) = db.getCachedArticleDao()
+
+
+    @Provides
+    @Singleton
     fun provideNewsLocalRepository(db: ArticleDatabase): NewsLocalRepository {
         return NewsLocalRepositoryImpl(db)
     }
+
+    @Provides
+    @Singleton
+    fun provideCachedNewsLocalRepository(db: ArticleDatabase): CachedNewsLocalRepository {
+        return CachedNewsLocalRepositoryImpl(db)
+    }
+
 
 
 }

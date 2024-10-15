@@ -5,9 +5,9 @@ import androidx.room.PrimaryKey
 import java.io.Serializable
 
 @Entity(
-    tableName = "articles"
+    tableName = "cachedArticles"
 )
-data class Article(
+data class CachedArticle(
     @PrimaryKey(autoGenerate = true)
     var idKey: Int? = null,
     val events: List<Event?>?,
@@ -23,8 +23,8 @@ data class Article(
     val url: String?
 ) : Serializable
 
-fun CachedArticle.toArticle(): Article {
-    return Article(
+fun Article.toCachedArticle(): CachedArticle {
+    return CachedArticle(
         idKey = this.idKey,
         events = this.events,
         featured = this.featured,
@@ -40,6 +40,6 @@ fun CachedArticle.toArticle(): Article {
     )
 }
 
-fun List<CachedArticle>.toArticles(): List<Article> {
-    return this.map { it.toArticle() }
+fun List<Article>.toCachedArticles(): List<CachedArticle> {
+    return this.map { it.toCachedArticle() }
 }
