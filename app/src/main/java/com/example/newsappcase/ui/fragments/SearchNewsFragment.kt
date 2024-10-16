@@ -17,9 +17,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.newsappcase.R
 import com.example.newsappcase.adapters.NewsAdapter
 import com.example.newsappcase.databinding.FragmentSearchNewsBinding
+import com.example.newsappcase.extensions.gone
 import com.example.newsappcase.extensions.invisible
 import com.example.newsappcase.extensions.showToast
 import com.example.newsappcase.extensions.visible
+import com.example.newsappcase.model.NewsResponse
 import com.example.newsappcase.ui.viewmodel.SearchNewsViewModel
 import com.example.newsappcase.util.Constants
 import com.example.newsappcase.util.Resource
@@ -60,8 +62,6 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             if (shouldPaginate) {
                 if (binding.etSearch.text.isNotEmpty()) {
                     viewModel.searchNews(binding.etSearch.text.toString(), true)
-                } else {
-                    viewModel.searchNews("", true)
                 }
                 isScrolling = false
             } else {
@@ -102,16 +102,23 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                 searchJob = MainScope().launch {
                     editable?.let {
                         if (editable.toString().isNotEmpty()) {
+                            binding.layoutSearch.gone()
                             viewModel.searchNews(editable.toString(), false)
                         } else {
                             newsAdapter.differ.submitList(emptyList())
-                            viewModel.searchNews("", false)
+                            binding.tvSearchInfo.text = getString(R.string.search_for_news)
+                            binding.layoutSearch.visible()
                         }
                     }
                 }
 
             }
         }
+        observeViewModel()
+
+    }
+
+    private fun observeViewModel(){
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.newsData.collectLatest { newsResponse ->
                 when (newsResponse) {
@@ -125,14 +132,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                     is Resource.Success -> {
                         hideProgressBar()
                         newsResponse.data?.let { newsResponse ->
-                            newsAdapter.differ.submitList(newsResponse.results.toList())
-                            val totalPages =
-                                newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
-                            isLastPage =
-                                viewModel.newsOffset == totalPages// bu yanlıs buraya bi bakıcam
-                            if (isLastPage) {
-                                binding.rvSearchNews.setPadding(0, 0, 0, 0)
-                            }
+                            handleNewsResponse(newsResponse)
                         }
                     }
                     is Resource.NoConnection -> {
@@ -152,6 +152,22 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                     )
                 }
             }
+        }
+    }
+
+    private fun handleNewsResponse(newsResponse: NewsResponse) {
+        if(binding.etSearch.text.isNotEmpty())
+            newsAdapter.differ.submitList(newsResponse.results.toList())
+        if(newsResponse.results.isEmpty()){
+            binding.tvSearchInfo.text = getString(R.string.nothing_found)
+            binding.layoutSearch.visible()
+        }
+        val totalPages =
+            newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
+        isLastPage =
+            viewModel.newsOffset == totalPages
+        if (isLastPage) {
+            binding.rvSearchNews.setPadding(0, 0, 0, 0)
         }
     }
 

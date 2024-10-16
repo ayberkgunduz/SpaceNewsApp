@@ -46,38 +46,48 @@ class DetailedNewsFragment : Fragment() {
                 webViewClient = WebViewClient()
                 it.url?.let { it1 -> loadUrl(it1) }
             }
+        }
 
-            binding.actionButton.setSingleOnClickListener {
-                viewModel.favoriteButtonClicked(article)
+        binding.actionButton.setSingleOnClickListener {
+            viewModel.favoriteButtonClicked(article)
+        }
+
+        observeViewModel()
+        viewModel.checkIsArticleSaved(article)
+    }
+
+    private fun observeViewModel(){
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.favoriteStatus.collectLatest { isSaved ->
+                if (isSaved) {
+                    binding.actionButton.setImageResource(R.drawable.ic_favorite)
+                } else {
+                    binding.actionButton.setImageResource(R.drawable.ic_not_favorite)
+                }
             }
+        }
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.favoriteStatus.collectLatest { isSaved ->
-                    if (isSaved) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.favoriteEvent.collectLatest { event ->
+                when (event) {
+                    FavoriteEvent.AddedFavorite -> {
+                        context?.showToast(getString(R.string.article_saved))
                         binding.actionButton.setImageResource(R.drawable.ic_favorite)
-                    } else {
+                    }
+
+                    FavoriteEvent.RemovedFavorite -> {
+                        context?.showToast(getString(R.string.article_removed))
                         binding.actionButton.setImageResource(R.drawable.ic_not_favorite)
                     }
                 }
             }
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.favoriteEvent.collectLatest { event ->
-                    when (event) {
-                        FavoriteEvent.AddedFavorite ->{
-                            context?.showToast(getString(R.string.article_saved))
-                            binding.actionButton.setImageResource(R.drawable.ic_favorite)
-                        }
-                        FavoriteEvent.RemovedFavorite -> {
-                            context?.showToast(getString(R.string.article_removed))
-                            binding.actionButton.setImageResource(R.drawable.ic_not_favorite)
-                        }
-                    }
-                }
-            }
-
         }
-        viewModel.checkIsArticleSaved(article)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 
 }

@@ -35,17 +35,6 @@ class SearchNewsViewModel @Inject constructor(
     private var searchNewsLimit = 10
     private var searchNewsResponse: NewsResponse? = null
 
-    init {
-        viewModelScope.launch {
-            if (checkInternetConnection()) {
-                if (searchNewsResponse == null)
-                    searchNews("", false)
-            } else {
-                updateOfflineNewsData(Resource.NoConnection(null))
-            }
-        }
-    }
-
     fun searchNews(searchQuery: String, isPaginating: Boolean) = viewModelScope.launch {
         Log.d(TAG, "Search query: $searchQuery")
         if (!checkInternetConnection()) {

@@ -10,4 +10,6 @@
     <string name="detailed_news">Details</string>
     <string name="favorite_news">Favorite News</string>
     <string name="search_news">Search News</string>
+    <string name="search_for_news">Search For Articles Here!</string>
+    <string name="nothing_found">No results found</string>
 </resources>

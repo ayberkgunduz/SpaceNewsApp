@@ -84,6 +84,11 @@ class NewsFragment : Fragment() {
             val direction = NewsFragmentDirections.actionNewsFragmentToDetailedNewsFragment(it)
             findNavController().navigate(direction)
         }
+        observeViewModel()
+        viewModel.initNews()
+    }
+
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.newsData.collectLatest { newsResponse ->
                 when (newsResponse) {
@@ -132,9 +137,7 @@ class NewsFragment : Fragment() {
                 }
             }
         }
-        viewModel.initNews()
     }
-
 
     private fun hideProgressBar() {
         binding.paginationProgressBar.invisible()
