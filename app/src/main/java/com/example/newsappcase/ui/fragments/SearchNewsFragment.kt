@@ -104,6 +104,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                         if (editable.toString().isNotEmpty()) {
                             viewModel.searchNews(editable.toString(), false)
                         } else {
+                            newsAdapter.differ.submitList(emptyList())
                             viewModel.searchNews("", false)
                         }
                     }

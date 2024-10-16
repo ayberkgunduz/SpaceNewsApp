@@ -38,7 +38,8 @@ class SearchNewsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             if (checkInternetConnection()) {
-                searchNews("", false)
+                if (searchNewsResponse == null)
+                    searchNews("", false)
             } else {
                 updateOfflineNewsData(Resource.NoConnection(null))
             }

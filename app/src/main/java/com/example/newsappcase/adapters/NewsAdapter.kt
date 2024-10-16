@@ -28,7 +28,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.url == newItem.url || oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {

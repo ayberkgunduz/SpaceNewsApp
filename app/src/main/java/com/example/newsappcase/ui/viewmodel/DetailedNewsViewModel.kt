@@ -1,7 +1,6 @@
 package com.example.newsappcase.ui.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.newsappcase.domain.repository.CachedNewsLocalRepository
 import com.example.newsappcase.domain.usecase.CachedNewsRepositoryOperationsUseCase
 import com.example.newsappcase.domain.usecase.GetNewsUseCase
 import com.example.newsappcase.domain.usecase.SaveAndDeleteNewsUseCase
@@ -10,7 +9,9 @@ import com.example.newsappcase.network.NetworkConnectionInterceptor
 import com.example.newsappcase.util.FavoriteEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,7 +30,19 @@ class DetailedNewsViewModel @Inject constructor(
     private val _favoriteEvent = MutableSharedFlow<FavoriteEvent>()
     val favoriteEvent: SharedFlow<FavoriteEvent> = _favoriteEvent
 
-    fun checkIsArticleSaved(article: Article) = viewModelScope.launch {
+    private val _favoriteStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val favoriteStatus: StateFlow<Boolean> = _favoriteStatus
+
+
+    fun checkIsArticleSaved(article: Article) {
+        viewModelScope.launch {
+            article.id?.let {
+                _favoriteStatus.emit(saveAndDeleteNewsUseCase.checkArticleIsSaved(it))
+            }
+        }
+    }
+
+    fun favoriteButtonClicked(article: Article) = viewModelScope.launch {
         article.id?.let {
             if (saveAndDeleteNewsUseCase.checkArticleIsSaved(it)) {
                 deleteArticle(article)

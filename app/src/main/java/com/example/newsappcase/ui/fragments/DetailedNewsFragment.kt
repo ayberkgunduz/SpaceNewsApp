@@ -48,19 +48,36 @@ class DetailedNewsFragment : Fragment() {
             }
 
             binding.actionButton.setSingleOnClickListener {
-                viewModel.checkIsArticleSaved(article)
+                viewModel.favoriteButtonClicked(article)
+            }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.favoriteStatus.collectLatest { isSaved ->
+                    if (isSaved) {
+                        binding.actionButton.setImageResource(R.drawable.ic_favorite)
+                    } else {
+                        binding.actionButton.setImageResource(R.drawable.ic_not_favorite)
+                    }
+                }
             }
 
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.favoriteEvent.collectLatest { event ->
                     when (event) {
-                        FavoriteEvent.AddedFavorite -> context?.showToast(getString(R.string.article_saved))
-                        FavoriteEvent.RemovedFavorite -> context?.showToast(getString(R.string.article_removed))
+                        FavoriteEvent.AddedFavorite ->{
+                            context?.showToast(getString(R.string.article_saved))
+                            binding.actionButton.setImageResource(R.drawable.ic_favorite)
+                        }
+                        FavoriteEvent.RemovedFavorite -> {
+                            context?.showToast(getString(R.string.article_removed))
+                            binding.actionButton.setImageResource(R.drawable.ic_not_favorite)
+                        }
                     }
                 }
             }
 
         }
+        viewModel.checkIsArticleSaved(article)
     }
 
 }
