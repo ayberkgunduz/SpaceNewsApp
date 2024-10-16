@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsappcase.domain.repository.CachedNewsLocalRepository
+import com.example.newsappcase.domain.usecase.CachedNewsRepositoryOperationsUseCase
 import com.example.newsappcase.domain.usecase.GetNewsType
 import com.example.newsappcase.domain.usecase.GetNewsUseCase
 import com.example.newsappcase.domain.usecase.SaveAndDeleteNewsUseCase
@@ -28,7 +29,7 @@ open class CommonNewsViewModel @Inject constructor(
     private val saveAndDeleteNewsUseCase: SaveAndDeleteNewsUseCase,
     private val networkConnectionInterceptor: NetworkConnectionInterceptor,
     private val getNewsUseCase: GetNewsUseCase,
-    private val cachedNewsLocalRepository: CachedNewsLocalRepository
+    private val cachedNewsRepositoryOperationsUseCase: CachedNewsRepositoryOperationsUseCase
 ) : ViewModel() {
     private val TAG = "CommonNewsViewModel"
 
@@ -69,8 +70,8 @@ open class CommonNewsViewModel @Inject constructor(
             _newsData.emit(Resource.Error(it.message.toString()))
         }.collect { response ->
             response.body()?.results?.forEach { article ->
-                if (article.id != null && cachedNewsLocalRepository.canInsertNewArticle(article.id)) {
-                    cachedNewsLocalRepository.insert(article)
+                if (article.id != null && cachedNewsRepositoryOperationsUseCase.canInsertNewArticle(article.id)) {
+                    cachedNewsRepositoryOperationsUseCase.insert(article)
                 }
             }
             _newsData.emit(handleGetNewsResponse(response))
@@ -78,7 +79,7 @@ open class CommonNewsViewModel @Inject constructor(
     }
 
     fun getCachedNewsForOfflineMode() = viewModelScope.launch {
-        _offlineNewsData.emit(Resource.NoConnection(cachedNewsLocalRepository.getAllCachedArticles()))
+        _offlineNewsData.emit(Resource.NoConnection(cachedNewsRepositoryOperationsUseCase.getAllCachedArticles()))
     }
 
     private fun handleGetNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
