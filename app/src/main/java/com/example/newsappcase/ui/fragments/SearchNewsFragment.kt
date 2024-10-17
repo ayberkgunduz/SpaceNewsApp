@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -26,9 +25,6 @@ import com.example.newsappcase.ui.viewmodel.SearchNewsViewModel
 import com.example.newsappcase.util.Constants
 import com.example.newsappcase.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -60,7 +56,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
                 if (binding?.etSearch?.text?.isNotEmpty() == true) {
-                    viewModel.searchNews(binding?.etSearch?.text.toString(), true)
+                    viewModel.searchNews(binding?.etSearch?.text.toString())
                 }
                 isScrolling = false
             } else {
@@ -82,6 +78,8 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
+        binding?.viewModel = viewModel
+        binding?.lifecycleOwner = viewLifecycleOwner
         return binding?.root
     }
 
@@ -92,27 +90,6 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             val direction =
                 SearchNewsFragmentDirections.actionSearchNewsFragmentToDetailedNewsFragment(it)
             findNavController().navigate(direction)
-        }
-        var searchJob: Job? = null
-        binding?.etSearch?.addTextChangedListener { editable ->
-            searchJob?.cancel()
-            searchJob = MainScope().launch {
-                delay(Constants.SEARCH_DELAY)
-                searchJob = MainScope().launch {
-                    editable?.let {
-                        if (editable.toString().isNotEmpty()) {
-                            binding?.layoutSearch?.gone()
-                            viewModel.searchNews(editable.toString(), false)
-                        } else {
-                            //viewModel.searchNews("", false)
-                            viewModel.queryCleaned()
-                            binding?.tvSearchInfo?.text = getString(R.string.search_for_news)
-                            binding?.layoutSearch?.visible()
-                        }
-                    }
-                }
-
-            }
         }
         observeViewModel()
     }
@@ -144,6 +121,22 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.infoText.collectLatest {
+                binding?.tvSearchInfo?.text = it
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.shouldShowInfo.collectLatest {
+                if (it) {
+                    binding?.layoutSearch?.visible()
+                } else {
+                    binding?.layoutSearch?.gone()
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.offlineNewsData.collectLatest { response ->
                 if (response is Resource.NoConnection) {
                     hideProgressBar()
@@ -159,8 +152,8 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     private fun handleNewsResponse(newsResponse: NewsResponse) {
         newsAdapter.differ.submitList(newsResponse.results.toList())
         if (newsResponse.results.isEmpty()) {
-            binding?.tvSearchInfo?.text = getString(R.string.nothing_found)
-            binding?.layoutSearch?.visible()
+            viewModel.setInfoText(getString(R.string.nothing_found))
+            viewModel.setShouldShowInfo(true)
         }
         val totalPages =
             newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2

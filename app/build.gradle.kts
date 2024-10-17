@@ -14,9 +14,8 @@ android {
     viewBinding{
         enable = true
     }
-    dataBinding{
-        enable = true
-    }
+    buildFeatures { dataBinding = true }
+
     defaultConfig {
         applicationId = "com.example.newsappcase"
         minSdk = 24
@@ -60,31 +59,26 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // Retrofit and Gson converter
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
-    // Room
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
-    // Coroutines support
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Architectural Components
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
 
-    // Navigation Components
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.2")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.2")
 
-    // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
@@ -92,10 +86,8 @@ dependencies {
     implementation ("com.google.dagger:hilt-android:2.51.1")
     kapt ("com.google.dagger:hilt-android-compiler:2.51.1")
 
-    // For Hilt with ViewModel
     kapt ("androidx.hilt:hilt-compiler:1.0.0")
 
-    // For Hilt with Navigation component (optional, if using navigation)
     implementation ("androidx.hilt:hilt-navigation-fragment:1.2.0")
 
     implementation ("androidx.test:core:1.5.0")
@@ -107,9 +99,7 @@ dependencies {
     testImplementation ("com.google.truth:truth:1.1.3")
     testImplementation ("org.mockito:mockito-core:4.7.0")
 
-// Android Test Implementations
     androidTestImplementation ("junit:junit:4.13.2")
-//androidTestImplementation ("com.linkedin.dexmaker:dexmaker-mockito:2.12.1")
     androidTestImplementation ("org.mockito:mockito-android:4.7.0")
     androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")

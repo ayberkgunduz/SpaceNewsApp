@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data></data>
+    <data>
+        <import type="android.view.View" />
+        <variable
+            name="viewModel"
+            type="com.example.newsappcase.ui.viewmodel.SearchNewsViewModel" />
+
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -16,6 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:hint="@string/search_text"
+            android:text="@={viewModel.searchTextFlow}"
             android:background="@drawable/background_search"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
