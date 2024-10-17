@@ -35,8 +35,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     val TAG = "SearchNewsFragment"
-    private var _binding: FragmentSearchNewsBinding? = null
-    private val binding get() = _binding!!
+    private var binding: FragmentSearchNewsBinding? = null
 
     private val viewModel: SearchNewsViewModel by viewModels()
     private lateinit var newsAdapter: NewsAdapter
@@ -60,12 +59,12 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             val shouldPaginate = isNotLoadingAndOnNotLastPage && isLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible && isScrolling
             if (shouldPaginate) {
-                if (binding.etSearch.text.isNotEmpty()) {
-                    viewModel.searchNews(binding.etSearch.text.toString(), true)
+                if (binding?.etSearch?.text?.isNotEmpty() == true) {
+                    viewModel.searchNews(binding?.etSearch?.text.toString(), true)
                 }
                 isScrolling = false
             } else {
-                binding.rvSearchNews.setPadding(0, 0, 0, 0)
+                binding?.rvSearchNews?.setPadding(0, 0, 0, 0)
             }
         }
 
@@ -81,9 +80,9 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,19 +94,20 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             findNavController().navigate(direction)
         }
         var searchJob: Job? = null
-        binding.etSearch.addTextChangedListener { editable ->
+        binding?.etSearch?.addTextChangedListener { editable ->
             searchJob?.cancel()
             searchJob = MainScope().launch {
                 delay(Constants.SEARCH_DELAY)
                 searchJob = MainScope().launch {
                     editable?.let {
                         if (editable.toString().isNotEmpty()) {
-                            binding.layoutSearch.gone()
+                            binding?.layoutSearch?.gone()
                             viewModel.searchNews(editable.toString(), false)
                         } else {
-                            newsAdapter.differ.submitList(emptyList())
-                            binding.tvSearchInfo.text = getString(R.string.search_for_news)
-                            binding.layoutSearch.visible()
+                            //viewModel.searchNews("", false)
+                            viewModel.queryCleaned()
+                            binding?.tvSearchInfo?.text = getString(R.string.search_for_news)
+                            binding?.layoutSearch?.visible()
                         }
                     }
                 }
@@ -115,12 +115,11 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             }
         }
         observeViewModel()
-
     }
 
-    private fun observeViewModel(){
+    private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.newsData.collectLatest { newsResponse ->
+            viewModel.newsSearchData.collectLatest { newsResponse ->
                 when (newsResponse) {
                     is Resource.Error -> {
                         hideProgressBar()
@@ -131,8 +130,10 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
                     is Resource.Loading -> showProgressBar()
                     is Resource.Success -> {
                         hideProgressBar()
-                        newsResponse.data?.let { newsResponse ->
-                            handleNewsResponse(newsResponse)
+                        if (newsResponse.data != null) {
+                            handleNewsResponse(newsResponse.data)
+                        } else {
+                            newsAdapter.differ.submitList(emptyList())
                         }
                     }
                     is Resource.NoConnection -> {
@@ -156,34 +157,33 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
     }
 
     private fun handleNewsResponse(newsResponse: NewsResponse) {
-        if(binding.etSearch.text.isNotEmpty())
-            newsAdapter.differ.submitList(newsResponse.results.toList())
-        if(newsResponse.results.isEmpty()){
-            binding.tvSearchInfo.text = getString(R.string.nothing_found)
-            binding.layoutSearch.visible()
+        newsAdapter.differ.submitList(newsResponse.results.toList())
+        if (newsResponse.results.isEmpty()) {
+            binding?.tvSearchInfo?.text = getString(R.string.nothing_found)
+            binding?.layoutSearch?.visible()
         }
         val totalPages =
             newsResponse.results.size / Constants.SINGLE_QUERY_ITEM_SIZE + 2
         isLastPage =
             viewModel.newsOffset == totalPages
         if (isLastPage) {
-            binding.rvSearchNews.setPadding(0, 0, 0, 0)
+            binding?.rvSearchNews?.setPadding(0, 0, 0, 0)
         }
     }
 
     private fun hideProgressBar() {
-        binding.paginationProgressBar.invisible()
+        binding?.paginationProgressBar?.invisible()
         isLoading = false
     }
 
     private fun showProgressBar() {
-        binding.paginationProgressBar.visible()
+        binding?.paginationProgressBar?.visible()
         isLoading = true
     }
 
     private fun setupNewsAdapter() {
         newsAdapter = NewsAdapter()
-        binding.rvSearchNews.apply {
+        binding?.rvSearchNews?.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@SearchNewsFragment.scrollListener)
@@ -192,6 +192,6 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        binding = null
     }
 }

@@ -39,17 +39,17 @@
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etSearch"
             app:layout_constraintBottom_toBottomOf="parent"
             >
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_search"
+                app:srcCompat="@drawable/ic_search"
                 app:tint="@color/white"/>
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvSearchInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

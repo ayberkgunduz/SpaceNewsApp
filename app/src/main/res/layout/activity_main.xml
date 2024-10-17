@@ -30,7 +30,7 @@
                 android:paddingBottom="15dp"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_back"
+                app:srcCompat="@drawable/ic_back"
                 android:visibility="visible"
                 android:tint="@color/white"
                 app:layout_constraintDimensionRatio="H,1:1"
@@ -38,7 +38,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
